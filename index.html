@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEase | Beauty E-Commerce Management</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="auth-page">
+    <div class="auth-card">
+        <div class="brand-icon">S</div>
+        <h1>ShopEase</h1>
+        <p class="subtitle">Beauty E-Commerce Management System</p>
+
+        <h3>Admin Login</h3>
+        <p class="muted">Welcome back! Please sign in.</p>
+
+        <form id="loginForm">
+            <label>Email Address</label>
+            <input type="email" id="loginEmail" class="form-control"
+                   placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" id="loginPassword" class="form-control"
+                   placeholder="Enter your password" required>
+
+            <p id="loginError" class="error"></p>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <p class="switch-text">
+            Don't have an account?
+            <a href="#" id="showRegister">Register here</a>
+        </p>
+
+        <div class="demo-login">
+            <strong>Demo Login</strong><br>
+            Email: admin@shopease.com<br>
+            Password: ShopEase123!
+        </div>
+    </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="registerPage" class="auth-page hidden">
+    <div class="auth-card">
+        <div class="brand-icon">S</div>
+        <h1>ShopEase</h1>
+        <p class="subtitle">Create your administrator account</p>
+
+        <form id="registerForm">
+            <label>Full Name</label>
+            <input type="text" id="registerName" class="form-control"
+                   placeholder="Enter your name" required>
+
+            <label>Email Address</label>
+            <input type="email" id="registerEmail" class="form-control"
+                   placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" id="registerPassword" class="form-control"
+                   placeholder="Minimum 6 characters" minlength="6" required>
+
+            <p id="registerError" class="error"></p>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+
+        <p class="switch-text">
+            Already have an account?
+            <a href="#" id="showLogin">Login here</a>
+        </p>
+    </div>
+</div>
+
+<!-- MAIN APPLICATION -->
+<div id="dashboardPage" class="hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2 class="logo">ShopEase</h2>
+        <p class="menu-label">MAIN MENU</p>
+
+        <nav>
+            <button class="nav-link active" data-page="dashboard">▦ Dashboard</button>
+            <button class="nav-link" data-page="products">◇ Products</button>
+            <button class="nav-link" data-page="orders">▤ Orders</button>
+            <button class="nav-link" data-page="customers">♙ Customers</button>
+            <button class="nav-link" data-page="analytics">▥ Sales Analytics</button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>Logged in as <strong id="adminName">Admin</strong></p>
+            <button id="logoutButton" class="logout-btn">Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">BEAUTY STORE MANAGEMENT</p>
+                <h2 id="pageTitle">Dashboard</h2>
+            </div>
+            <span class="store-status">● Store Active</span>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section id="dashboardSection" class="page-section">
+            <div class="welcome">
+                <div>
+                    <h3>Welcome back, <span id="welcomeName">Admin</span>!</h3>
+                    <p class="muted">Here's your store overview.</p>
+                </div>
+                <span id="currentDate" class="date-label"></span>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="summary-card">
+                    <p>Total Products</p>
+                    <h2 id="totalProducts">0</h2>
+                    <small>Products in catalogue</small>
+                </div>
+                <div class="summary-card">
+                    <p>Total Orders</p>
+                    <h2 id="totalOrders">0</h2>
+                    <small>Customer purchases</small>
+                </div>
+                <div class="summary-card">
+                    <p>Total Customers</p>
+                    <h2 id="totalCustomers">0</h2>
+                    <small>Registered customers</small>
+                </div>
+                <div class="summary-card">
+                    <p>Total Revenue</p>
+                    <h2 id="totalRevenue">RM 0</h2>
+                    <small>Based on sample orders</small>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="content-card">
+                    <h4>Monthly Revenue</h4>
+                    <p class="muted">Revenue overview</p>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="content-card">
+                    <h4>Order Status</h4>
+                    <p class="muted">Order distribution</p>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <div class="content-card recent-orders">
+                <h4>Recent Orders</h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTS -->
+        <section id="productsSection" class="page-section hidden">
+            <div class="section-heading">
+                <div>
+                    <h3>Product Management</h3>
+                    <p class="muted">Manage your beauty products.</p>
+                </div>
+                <button class="btn btn-primary" id="addProductButton">+ Add Product</button>
+            </div>
+
+            <div class="content-card">
+                <div class="toolbar">
+                    <input type="text" id="productSearch" class="form-control"
+                           placeholder="Search products...">
+                    <select id="categoryFilter" class="form-select">
+                        <option value="">All Categories</option>
+                        <option>Skincare</option>
+                        <option>Makeup</option>
+                        <option>Body Care</option>
+                        <option>Hair Care</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ORDERS -->
+        <section id="ordersSection" class="page-section hidden">
+            <div class="section-heading">
+                <div>
+                    <h3>Order Management</h3>
+                    <p class="muted">View and manage customer orders.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="toolbar">
+                    <input type="text" id="orderSearch" class="form-control"
+                           placeholder="Search order or customer...">
+                    <select id="orderFilter" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option>Pending</option>
+                        <option>Processing</option>
+                        <option>Completed</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Update Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CUSTOMERS -->
+        <section id="customersSection" class="page-section hidden">
+            <div class="section-heading">
+                <div>
+                    <h3>Customer Management</h3>
+                    <p class="muted">View registered customer information.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <input type="text" id="customerSearch" class="form-control search-box"
+                       placeholder="Search customers...">
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Email</th>
+                                <th>Total Orders</th>
+                                <th>Total Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="analyticsSection" class="page-section hidden">
+            <div class="section-heading">
+                <div>
+                    <h3>Sales Analytics</h3>
+                    <p class="muted">Analyse revenue and product performance.</p>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="content-card">
+                    <h4>Sales Performance</h4>
+                    <p class="muted">Monthly revenue (RM)</p>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="content-card">
+                    <h4>Products by Category</h4>
+                    <p class="muted">Product distribution</p>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <footer>ShopEase © 2026 | Academic Web Application Prototype</footer>
+    </main>
+</div>
+
+<!-- ADD / EDIT PRODUCT MODAL -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="productForm">
+                <div class="modal-header">
+                    <h5 id="modalTitle">Add Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProductId">
+
+                    <label>Product Name</label>
+                    <input type="text" id="productName" class="form-control mb-3" required>
+
+                    <label>Category</label>
+                    <select id="productCategory" class="form-select mb-3">
+                        <option>Skincare</option>
+                        <option>Makeup</option>
+                        <option>Body Care</option>
+                        <option>Hair Care</option>
+                    </select>
+
+                    <label>Price (RM)</label>
+                    <input type="number" id="productPrice" class="form-control mb-3"
+                           min="0.01" step="0.01" required>
+
+                    <label>Stock Quantity</label>
+                    <input type="number" id="productStock" class="form-control"
+                           min="0" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
