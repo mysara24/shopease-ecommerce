@@ -1,597 +1,700 @@
 
-// ==========================================
-// SHOEASE - BEAUTY E-COMMERCE ADMIN SYSTEM
-// ==========================================
+/* ==========================================
+   SHOPEASE - BEAUTY E-COMMERCE MANAGEMENT
+   ========================================== */
 
-// Demo administrator credentials
-const DEMO_EMAIL = "admin@shopease.com";
-const DEMO_PASSWORD = "ShopEase123!";
+const USERS_KEY = "shopease_users";
+const PRODUCTS_KEY = "shopease_products";
+const ORDERS_KEY = "shopease_orders";
+const CUSTOMERS_KEY = "shopease_customers";
+const SESSION_KEY = "shopease_session";
+const THEME_KEY = "shopease_theme";
 
-// Sample product data
-let products = JSON.parse(localStorage.getItem("products")) || [
-    {id: 1, name: "Vitamin C Brightening Serum", category: "Skincare", price: 45, stock: 24},
-    {id: 2, name: "Hydrating Daily Moisturizer", category: "Skincare", price: 60, stock: 18},
-    {id: 3, name: "Daily UV Sunscreen SPF 50", category: "Skincare", price: 35, stock: 8},
-    {id: 4, name: "Velvet Matte Lip Cream", category: "Makeup", price: 29, stock: 32},
-    {id: 5, name: "Rose Glow Blush", category: "Makeup", price: 39, stock: 14},
-    {id: 6, name: "Nourishing Body Lotion", category: "Body Care", price: 42, stock: 5},
-    {id: 7, name: "Repair Hair Mask", category: "Hair Care", price: 55, stock: 11}
+/* Demo account */
+
+const demoUser = {
+  name: "Administrator",
+  username: "admin",
+  password: "ShopEase123!"
+};
+
+/* Default products */
+
+const defaultProducts = [
+  { id: 1, name: "Hydrating Facial Cleanser", category: "Skincare", price: 35, stock: 40 },
+  { id: 2, name: "Vitamin C Serum", category: "Skincare", price: 55, stock: 25 },
+  { id: 3, name: "Matte Lipstick", category: "Makeup", price: 29, stock: 50 },
+  { id: 4, name: "Rose Blush Palette", category: "Makeup", price: 42, stock: 18 },
+  { id: 5, name: "Repair Hair Mask", category: "Haircare", price: 38, stock: 30 },
+  { id: 6, name: "Body Lotion", category: "Bodycare", price: 32, stock: 45 }
 ];
 
-// Sample order data
-let orders = JSON.parse(localStorage.getItem("orders")) || [
-    {id: 1001, customer: "Aisyah", product: "Vitamin C Brightening Serum", amount: 45, status: "Completed"},
-    {id: 1002, customer: "Sarah", product: "Hydrating Daily Moisturizer", amount: 60, status: "Pending"},
-    {id: 1003, customer: "Amira", product: "Daily UV Sunscreen SPF 50", amount: 35, status: "Processing"},
-    {id: 1004, customer: "Nadia", product: "Velvet Matte Lip Cream", amount: 29, status: "Completed"},
-    {id: 1005, customer: "Farah", product: "Nourishing Body Lotion", amount: 42, status: "Processing"}
+/* Default orders: January to November 2026 */
+
+const defaultOrders = [
+  { id: "ORD001", customer: "Aisha", date: "2026-01-12", total: 45, status: "Completed" },
+  { id: "ORD002", customer: "Sofia", date: "2026-02-08", total: 60, status: "Completed" },
+  { id: "ORD003", customer: "Nurul", date: "2026-03-17", total: 75, status: "Completed" },
+  { id: "ORD004", customer: "Mira", date: "2026-04-11", total: 85, status: "Completed" },
+  { id: "ORD005", customer: "Aisha", date: "2026-05-06", total: 95, status: "Completed" },
+  { id: "ORD006", customer: "Sofia", date: "2026-06-19", total: 110, status: "Completed" },
+  { id: "ORD007", customer: "Nurul", date: "2026-07-14", total: 120, status: "Completed" },
+  { id: "ORD008", customer: "Mira", date: "2026-08-09", total: 130, status: "Completed" },
+  { id: "ORD009", customer: "Aisha", date: "2026-09-22", total: 145, status: "Completed" },
+  { id: "ORD010", customer: "Sofia", date: "2026-10-16", total: 170, status: "Completed" },
+  { id: "ORD011", customer: "Nurul", date: "2026-11-03", total: 210, status: "Completed" },
+  { id: "ORD012", customer: "Mira", date: "2026-11-08", total: 68, status: "Pending" },
+  { id: "ORD013", customer: "Aisha", date: "2026-11-12", total: 92, status: "Processing" },
+  { id: "ORD014", customer: "Sofia", date: "2026-11-15", total: 55, status: "Pending" }
 ];
 
-// Sample customer data
-let customers = JSON.parse(localStorage.getItem("customers")) || [
-    {name: "Aisyah", email: "aisyah@example.com"},
-    {name: "Sarah", email: "sarah@example.com"},
-    {name: "Amira", email: "amira@example.com"},
-    {name: "Nadia", email: "nadia@example.com"},
-    {name: "Farah", email: "farah@example.com"}
+const defaultCustomers = [
+  { name: "Aisha", username: "aisha01", date: "2026-10-01" },
+  { name: "Sofia", username: "sofia02", date: "2026-10-05" },
+  { name: "Nurul", username: "nurul03", date: "2026-10-12" },
+  { name: "Mira", username: "mira04", date: "2026-10-18" }
 ];
 
+/* Local storage functions */
+
+function getData(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function initialiseStorage() {
+  const users = getData(USERS_KEY);
+
+  if (!users.some(user => user.username === "admin")) {
+    users.push(demoUser);
+    saveData(USERS_KEY, users);
+  }
+
+  if (!localStorage.getItem(PRODUCTS_KEY)) {
+    saveData(PRODUCTS_KEY, defaultProducts);
+  }
+
+  if (!localStorage.getItem(ORDERS_KEY)) {
+    saveData(ORDERS_KEY, defaultOrders);
+  }
+
+  if (!localStorage.getItem(CUSTOMERS_KEY)) {
+    saveData(CUSTOMERS_KEY, defaultCustomers);
+  }
+}
+
+initialiseStorage();
+
+/* Update original four demo orders only */
+
+const existingOrders = getData(ORDERS_KEY);
+const originalDemoIds = ["ORD001", "ORD002", "ORD003", "ORD004"];
+
+const isOriginalDemoData =
+  existingOrders.length === 4 &&
+  originalDemoIds.every(id =>
+    existingOrders.some(order => order.id === id)
+  );
+
+if (isOriginalDemoData) {
+  saveData(ORDERS_KEY, defaultOrders);
+}
+
+/* Application variables */
+
+let products = getData(PRODUCTS_KEY);
+let orders = getData(ORDERS_KEY);
+let customers = getData(CUSTOMERS_KEY);
 let charts = {};
 
-const get = id => document.getElementById(id);
+const loginSection = document.getElementById("loginSection");
+const registerSection = document.getElementById("registerSection");
+const appSection = document.getElementById("appSection");
 
-function saveData() {
-    localStorage.setItem("products", JSON.stringify(products));
-    localStorage.setItem("orders", JSON.stringify(orders));
-    localStorage.setItem("customers", JSON.stringify(customers));
-}
+/* Registration and login navigation */
 
-function formatMoney(amount) {
-    return "RM " + Number(amount).toFixed(2);
-}
+document.getElementById("showRegister").addEventListener("click", event => {
+  event.preventDefault();
 
-// Escape displayed text
-function safeText(value) {
-    return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[char]);
-}
-
-// ==========================================
-// LOGIN AND REGISTRATION
-// ==========================================
-
-function showPage(id) {
-    ["loginPage", "registerPage", "dashboardPage"].forEach(page => {
-        get(page).classList.add("hidden");
-    });
-
-    get(id).classList.remove("hidden");
-}
-
-get("showRegister").addEventListener("click", function(event) {
-    event.preventDefault();
-    showPage("registerPage");
+  loginSection.classList.add("d-none");
+  registerSection.classList.remove("d-none");
 });
 
-get("showLogin").addEventListener("click", function(event) {
-    event.preventDefault();
-    showPage("loginPage");
+document.getElementById("showLogin").addEventListener("click", event => {
+  event.preventDefault();
+
+  registerSection.classList.add("d-none");
+  loginSection.classList.remove("d-none");
 });
 
-// Login validation
-get("loginForm").addEventListener("submit", function(event) {
+/* Registration */
+
+document.getElementById("registerForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const name = document.getElementById("registerName").value.trim();
+  const username = document.getElementById("registerUsername").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const confirm = document.getElementById("confirmPassword").value;
+  const message = document.getElementById("registerMessage");
+
+  const users = getData(USERS_KEY);
+
+  if (password !== confirm) {
+    message.className = "text-danger small";
+    message.textContent = "Passwords do not match.";
+    return;
+  }
+
+  if (users.some(user =>
+    user.username.toLowerCase() === username.toLowerCase()
+  )) {
+    message.className = "text-danger small";
+    message.textContent = "Username already exists.";
+    return;
+  }
+
+  users.push({ name, username, password });
+  saveData(USERS_KEY, users);
+
+  customers = getData(CUSTOMERS_KEY);
+
+  customers.push({
+    name,
+    username,
+    date: new Date().toISOString().slice(0, 10)
+  });
+
+  saveData(CUSTOMERS_KEY, customers);
+
+  message.className = "text-success small";
+  message.textContent = "Registration successful! You can now log in.";
+
+  document.getElementById("registerForm").reset();
+});
+
+/* Login */
+
+document.getElementById("loginForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  const users = getData(USERS_KEY);
+
+  const user = users.find(item =>
+    item.username.toLowerCase() === username.toLowerCase() &&
+    item.password === password
+  );
+
+  const error = document.getElementById("loginError");
+
+  if (!user) {
+    error.textContent = "Incorrect username or password. Please try again.";
+    return;
+  }
+
+  error.textContent = "";
+
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    name: user.name,
+    username: user.username
+  }));
+
+  openApplication(user);
+});
+
+/* Open application */
+
+function openApplication(user) {
+  loginSection.classList.add("d-none");
+  registerSection.classList.add("d-none");
+  appSection.classList.remove("d-none");
+
+  document.getElementById("currentUser").textContent = user.name;
+
+  products = getData(PRODUCTS_KEY);
+  orders = getData(ORDERS_KEY);
+  customers = getData(CUSTOMERS_KEY);
+
+  renderAll();
+}
+
+/* Restore session */
+
+const savedSession = sessionStorage.getItem(SESSION_KEY);
+
+if (savedSession) {
+  try {
+    openApplication(JSON.parse(savedSession));
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+}
+
+/* Logout */
+
+document.getElementById("logoutButton").addEventListener("click", logout);
+
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+
+  appSection.classList.add("d-none");
+  registerSection.classList.add("d-none");
+  loginSection.classList.remove("d-none");
+
+  document.getElementById("loginForm").reset();
+}
+
+/* Navigation */
+
+const pageDetails = {
+  dashboard: ["Dashboard", "Welcome to your ShopEase management system."],
+  products: ["Products", "Manage your beauty product inventory."],
+  orders: ["Orders", "Manage customer orders."],
+  customers: ["Customers", "View registered customers."],
+  analytics: ["Sales Analytics", "Analyse your store performance."]
+};
+
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", event => {
     event.preventDefault();
+    showPage(link.dataset.page);
+  });
+});
 
-    const email = get("loginEmail").value.trim().toLowerCase();
-    const password = get("loginPassword").value;
+function showPage(page) {
+  if (!pageDetails[page]) return;
 
-    const registeredUsers = JSON.parse(
-        localStorage.getItem("registeredUsers") || "[]"
+  document.querySelectorAll(".page-section").forEach(section => {
+    section.classList.add("d-none");
+  });
+
+  document.getElementById(page + "Page").classList.remove("d-none");
+
+  document.querySelectorAll(".nav-link").forEach(link => {
+    link.classList.toggle("active", link.dataset.page === page);
+  });
+
+  document.getElementById("pageHeading").textContent = pageDetails[page][0];
+  document.getElementById("pageSubheading").textContent = pageDetails[page][1];
+
+  document.getElementById("sidebar").classList.remove("show");
+
+  if (page === "analytics") {
+    setTimeout(renderCharts, 150);
+  }
+}
+
+/* Mobile sidebar */
+
+document.getElementById("sidebarToggle").addEventListener("click", () => {
+  document.getElementById("sidebar").classList.toggle("show");
+});
+
+/* Dark and light mode */
+
+function applyTheme(theme) {
+  document.body.classList.toggle("dark-mode", theme === "dark");
+  localStorage.setItem(THEME_KEY, theme);
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains("dark-mode");
+
+  applyTheme(isDark ? "light" : "dark");
+
+  renderCharts();
+}
+
+document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+document.getElementById("mobileTheme").addEventListener("click", toggleTheme);
+
+applyTheme(localStorage.getItem(THEME_KEY) || "light");
+
+/* Product modal */
+
+const productModal = new bootstrap.Modal(
+  document.getElementById("productModal")
+);
+
+document.getElementById("addProductButton").addEventListener("click", () => {
+  document.getElementById("productForm").reset();
+  document.getElementById("productId").value = "";
+  document.getElementById("productModalTitle").textContent = "Add Product";
+
+  productModal.show();
+});
+
+/* Add and edit product */
+
+document.getElementById("productForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const id = document.getElementById("productId").value;
+
+  const product = {
+    id: id ? Number(id) : Date.now(),
+    name: document.getElementById("productName").value.trim(),
+    category: document.getElementById("productCategory").value,
+    price: Number(document.getElementById("productPrice").value),
+    stock: Number(document.getElementById("productStock").value)
+  };
+
+  if (!product.name || !product.category ||
+      !Number.isFinite(product.price) || product.price <= 0 ||
+      !Number.isInteger(product.stock) || product.stock < 0) {
+    alert("Please enter valid product information.");
+    return;
+  }
+
+  if (id) {
+    products = products.map(item =>
+      item.id === Number(id) ? product : item
     );
+  } else {
+    products.push(product);
+  }
 
-    const registeredUser = registeredUsers.find(user =>
-        user.email === email && user.password === password
-    );
+  saveData(PRODUCTS_KEY, products);
 
-    if (
-        (email === DEMO_EMAIL && password === DEMO_PASSWORD) ||
-        registeredUser
-    ) {
-        const admin = {
-            name: registeredUser ? registeredUser.name : "Admin",
-            email: email
-        };
-
-        sessionStorage.setItem("currentAdmin", JSON.stringify(admin));
-        get("loginError").textContent = "";
-
-        enterDashboard();
-    } else {
-        get("loginError").textContent =
-            "Incorrect email or password. Please try again.";
-    }
+  productModal.hide();
+  renderAll();
 });
 
-// Registration validation
-get("registerForm").addEventListener("submit", function(event) {
-    event.preventDefault();
+/* Edit product */
 
-    const name = get("registerName").value.trim();
-    const email = get("registerEmail").value.trim().toLowerCase();
-    const password = get("registerPassword").value;
+function editProduct(id) {
+  const product = products.find(item => item.id === id);
 
-    let users = JSON.parse(
-        localStorage.getItem("registeredUsers") || "[]"
-    );
+  if (!product) return;
 
-    if (email === DEMO_EMAIL || users.some(user => user.email === email)) {
-        get("registerError").textContent =
-            "This email address is already registered.";
-        return;
-    }
+  document.getElementById("productId").value = product.id;
+  document.getElementById("productName").value = product.name;
+  document.getElementById("productCategory").value = product.category;
+  document.getElementById("productPrice").value = product.price;
+  document.getElementById("productStock").value = product.stock;
+  document.getElementById("productModalTitle").textContent = "Edit Product";
 
-    if (password.length < 6) {
-        get("registerError").textContent =
-            "Password must contain at least 6 characters.";
-        return;
-    }
-
-    users.push({name, email, password});
-
-    localStorage.setItem("registeredUsers", JSON.stringify(users));
-
-    get("registerForm").reset();
-
-    get("registerError").textContent =
-        "Account created successfully! Please log in.";
-
-    setTimeout(() => {
-        showPage("loginPage");
-        get("loginError").textContent = "Your account is ready. Please sign in.";
-    }, 800);
-});
-
-// Logout
-get("logoutButton").addEventListener("click", function() {
-    sessionStorage.removeItem("currentAdmin");
-    showPage("loginPage");
-});
-
-// ==========================================
-// DASHBOARD
-// ==========================================
-
-function enterDashboard() {
-    const admin = JSON.parse(sessionStorage.getItem("currentAdmin"));
-
-    showPage("dashboardPage");
-
-    get("adminName").textContent = admin.name;
-    get("welcomeName").textContent = admin.name;
-
-    get("currentDate").textContent =
-        new Date().toLocaleDateString("en-MY", {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-        });
-
-    renderAll();
-    navigate("dashboard");
+  productModal.show();
 }
 
-function updateDashboard() {
-    get("totalProducts").textContent = products.length;
-    get("totalOrders").textContent = orders.length;
-    get("totalCustomers").textContent = customers.length;
+/* Delete product */
 
-    const revenue = orders.reduce(
-        (total, order) => total + Number(order.amount), 0
-    );
+function deleteProduct(id) {
+  if (!confirm("Are you sure you want to delete this product?")) return;
 
-    get("totalRevenue").textContent = formatMoney(revenue);
+  products = products.filter(item => item.id !== id);
+
+  saveData(PRODUCTS_KEY, products);
+  renderAll();
 }
 
-// ==========================================
-// NAVIGATION
-// ==========================================
-
-document.querySelectorAll("[data-page]").forEach(button => {
-    button.addEventListener("click", function(event) {
-        event.preventDefault();
-        navigate(button.dataset.page);
-    });
-});
-
-function navigate(page) {
-    document.querySelectorAll(".page-section").forEach(section => {
-        section.classList.add("hidden");
-    });
-
-    get(page + "Section").classList.remove("hidden");
-
-    document.querySelectorAll(".nav-link").forEach(button => {
-        button.classList.toggle(
-            "active",
-            button.dataset.page === page
-        );
-    });
-
-    const titles = {
-        dashboard: "Dashboard",
-        products: "Products",
-        orders: "Orders",
-        customers: "Customers",
-        analytics: "Sales Analytics"
-    };
-
-    get("pageTitle").textContent = titles[page];
-
-    if (page === "dashboard" || page === "analytics") {
-        setTimeout(renderCharts, 100);
-    }
-}
-
-// ==========================================
-// PRODUCT MANAGEMENT
-// ==========================================
-
-const productModal = new bootstrap.Modal(get("productModal"));
-
-get("addProductButton").addEventListener("click", function() {
-    get("productForm").reset();
-    get("editProductId").value = "";
-    get("modalTitle").textContent = "Add Product";
-
-    productModal.show();
-});
-
-get("productForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const id = Number(get("editProductId").value);
-
-    const product = {
-        id: id || Date.now(),
-        name: get("productName").value.trim(),
-        category: get("productCategory").value,
-        price: Number(get("productPrice").value),
-        stock: Number(get("productStock").value)
-    };
-
-    if (id) {
-        products = products.map(item =>
-            item.id === id ? product : item
-        );
-    } else {
-        products.push(product);
-    }
-
-    saveData();
-    renderProducts();
-    updateDashboard();
-    renderCharts();
-
-    productModal.hide();
-});
+/* Display products */
 
 function renderProducts() {
-    const search = get("productSearch").value.toLowerCase();
-    const category = get("categoryFilter").value;
+  const search = document.getElementById("productSearch").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch =
-            product.name.toLowerCase().includes(search) ||
-            product.category.toLowerCase().includes(search);
+  const filtered = products.filter(product =>
+    product.name.toLowerCase().includes(search) &&
+    (!category || product.category === category)
+  );
 
-        const matchesCategory =
-            category === "" || product.category === category;
+  document.getElementById("productTable").innerHTML = filtered.map(product => `
+    <tr>
+      <td><strong>${escapeHTML(product.name)}</strong></td>
+      <td>${escapeHTML(product.category)}</td>
+      <td>${product.price.toFixed(2)}</td>
+      <td>${product.stock}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary"
+          onclick="editProduct(${product.id})">Edit</button>
 
-        return matchesSearch && matchesCategory;
-    });
-
-    get("productsTable").innerHTML = filteredProducts.map(product => `
-        <tr>
-            <td><strong>${safeText(product.name)}</strong></td>
-            <td>${safeText(product.category)}</td>
-            <td>${formatMoney(product.price)}</td>
-            <td>
-                <span class="${product.stock < 10 ? "low-stock" : "normal-stock"}">
-                    ${product.stock}
-                </span>
-            </td>
-            <td>
-                <button class="action-btn" onclick="editProduct(${product.id})">
-                    Edit
-                </button>
-                <button class="action-btn" onclick="deleteProduct(${product.id})">
-                    Delete
-                </button>
-            </td>
-        </tr>
-    `).join("") || `
-        <tr><td colspan="5">No products found.</td></tr>
-    `;
+        <button class="btn btn-sm btn-outline-danger"
+          onclick="deleteProduct(${product.id})">Delete</button>
+      </td>
+    </tr>
+  `).join("") ||
+  `<tr><td colspan="5" class="text-center">No products found.</td></tr>`;
 }
 
-get("productSearch").addEventListener("input", renderProducts);
-get("categoryFilter").addEventListener("change", renderProducts);
+document.getElementById("productSearch").addEventListener("input", renderProducts);
+document.getElementById("categoryFilter").addEventListener("change", renderProducts);
 
-window.editProduct = function(id) {
-    const product = products.find(item => item.id === id);
-
-    get("editProductId").value = product.id;
-    get("productName").value = product.name;
-    get("productCategory").value = product.category;
-    get("productPrice").value = product.price;
-    get("productStock").value = product.stock;
-
-    get("modalTitle").textContent = "Edit Product";
-
-    productModal.show();
-};
-
-window.deleteProduct = function(id) {
-    if (confirm("Are you sure you want to delete this product?")) {
-        products = products.filter(product => product.id !== id);
-
-        saveData();
-        renderProducts();
-        updateDashboard();
-        renderCharts();
-    }
-};
-
-// ==========================================
-// ORDER MANAGEMENT
-// ==========================================
+/* Order management */
 
 function renderOrders() {
-    const search = get("orderSearch").value.toLowerCase();
-    const filter = get("orderFilter").value;
+  const search = document.getElementById("orderSearch").value.toLowerCase();
 
-    const filteredOrders = orders.filter(order => {
-        const matchesSearch =
-            String(order.id).includes(search) ||
-            order.customer.toLowerCase().includes(search) ||
-            order.product.toLowerCase().includes(search);
+  const filtered = orders.filter(order =>
+    order.id.toLowerCase().includes(search) ||
+    order.customer.toLowerCase().includes(search)
+  );
 
-        const matchesStatus =
-            filter === "" || order.status === filter;
-
-        return matchesSearch && matchesStatus;
-    });
-
-    get("ordersTable").innerHTML = filteredOrders.map(order => `
-        <tr>
-            <td>#${order.id}</td>
-            <td>${safeText(order.customer)}</td>
-            <td>${safeText(order.product)}</td>
-            <td>${formatMoney(order.amount)}</td>
-            <td>
-                <span class="status ${order.status}">
-                    ${order.status}
-                </span>
-            </td>
-            <td>
-                <select class="form-select form-select-sm"
-                    onchange="updateOrderStatus(${order.id}, this.value)">
-                    <option ${order.status === "Pending" ? "selected" : ""}>Pending</option>
-                    <option ${order.status === "Processing" ? "selected" : ""}>Processing</option>
-                    <option ${order.status === "Completed" ? "selected" : ""}>Completed</option>
-                </select>
-            </td>
-        </tr>
-    `).join("") || `
-        <tr><td colspan="6">No orders found.</td></tr>
-    `;
+  document.getElementById("orderTable").innerHTML = filtered.map(order => `
+    <tr>
+      <td>${escapeHTML(order.id)}</td>
+      <td>${escapeHTML(order.customer)}</td>
+      <td>${escapeHTML(order.date)}</td>
+      <td>${Number(order.total).toFixed(2)}</td>
+      <td>
+        <span class="badge text-bg-secondary">
+          ${escapeHTML(order.status)}
+        </span>
+      </td>
+      <td>
+        <select class="form-select form-select-sm"
+          onchange="updateOrderStatus('${escapeHTML(order.id)}', this.value)">
+          ${["Pending", "Processing", "Completed", "Cancelled"].map(status =>
+            `<option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>`
+          ).join("")}
+        </select>
+      </td>
+    </tr>
+  `).join("") ||
+  `<tr><td colspan="6" class="text-center">No orders found.</td></tr>`;
 }
 
-get("orderSearch").addEventListener("input", renderOrders);
-get("orderFilter").addEventListener("change", renderOrders);
+document.getElementById("orderSearch").addEventListener("input", renderOrders);
 
-window.updateOrderStatus = function(id, status) {
-    orders = orders.map(order =>
-        order.id === id ? {...order, status: status} : order
-    );
+/* Update order status */
 
-    saveData();
-    renderOrders();
-    renderRecentOrders();
-    updateDashboard();
-    renderCharts();
-};
+function updateOrderStatus(id, status) {
+  const allowedStatuses = ["Pending", "Processing", "Completed", "Cancelled"];
 
-// ==========================================
-// CUSTOMER MANAGEMENT
-// ==========================================
+  if (!allowedStatuses.includes(status)) return;
+
+  orders = orders.map(order =>
+    order.id === id ? { ...order, status } : order
+  );
+
+  saveData(ORDERS_KEY, orders);
+  renderAll();
+}
+
+/* Customer management */
 
 function renderCustomers() {
-    const search = get("customerSearch").value.toLowerCase();
+  const search = document.getElementById("customerSearch").value.toLowerCase();
 
-    const filteredCustomers = customers.filter(customer =>
-        customer.name.toLowerCase().includes(search) ||
-        customer.email.toLowerCase().includes(search)
-    );
+  const filtered = customers.filter(customer =>
+    customer.name.toLowerCase().includes(search) ||
+    customer.username.toLowerCase().includes(search)
+  );
 
-    get("customersTable").innerHTML = filteredCustomers.map(customer => {
-        const customerOrders = orders.filter(
-            order => order.customer === customer.name
-        );
-
-        const totalSpent = customerOrders.reduce(
-            (total, order) => total + Number(order.amount), 0
-        );
-
-        return `
-            <tr>
-                <td><strong>${safeText(customer.name)}</strong></td>
-                <td>${safeText(customer.email)}</td>
-                <td>${customerOrders.length}</td>
-                <td>${formatMoney(totalSpent)}</td>
-            </tr>
-        `;
-    }).join("") || `
-        <tr><td colspan="4">No customers found.</td></tr>
-    `;
+  document.getElementById("customerTable").innerHTML = filtered.map(customer => `
+    <tr>
+      <td>${escapeHTML(customer.name)}</td>
+      <td>${escapeHTML(customer.username)}</td>
+      <td>${escapeHTML(customer.date)}</td>
+    </tr>
+  `).join("") ||
+  `<tr><td colspan="3" class="text-center">No customers found.</td></tr>`;
 }
 
-get("customerSearch").addEventListener("input", renderCustomers);
+document.getElementById("customerSearch").addEventListener("input", renderCustomers);
 
-// ==========================================
-// RECENT ORDERS
-// ==========================================
+/* Dashboard summary */
 
-function renderRecentOrders() {
-    get("recentOrdersTable").innerHTML = orders.slice(-5).reverse().map(order => `
-        <tr>
-            <td>#${order.id}</td>
-            <td>${safeText(order.customer)}</td>
-            <td>${safeText(order.product)}</td>
-            <td>${formatMoney(order.amount)}</td>
-            <td>
-                <span class="status ${order.status}">
-                    ${order.status}
-                </span>
-            </td>
-        </tr>
-    `).join("");
+function renderDashboard() {
+  document.getElementById("totalProducts").textContent = products.length;
+  document.getElementById("totalOrders").textContent = orders.length;
+  document.getElementById("totalCustomers").textContent = customers.length;
+
+  const revenue = orders
+    .filter(order => order.status === "Completed")
+    .reduce((sum, order) => sum + Number(order.total), 0);
+
+  document.getElementById("totalRevenue").textContent =
+    "RM " + revenue.toLocaleString("en-MY", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
 }
 
-// ==========================================
-// CHARTS USING CHART.JS
-// ==========================================
+/* Chart.js visualisation */
 
 function renderCharts() {
-    if (typeof Chart === "undefined") return;
+  if (typeof Chart === "undefined") return;
 
-    Object.values(charts).forEach(chart => chart.destroy());
-    charts = {};
+  const completedOrders = orders.filter(order =>
+    order.status === "Completed"
+  );
 
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-    const revenueData = [3200, 4100, 3800, 5200, 4900, 6100];
+  const categoryNames = [
+    "Skincare",
+    "Makeup",
+    "Haircare",
+    "Bodycare"
+  ];
 
-    const commonOptions = {
+  const categoryCounts = categoryNames.map(category =>
+    products.filter(product => product.category === category).length
+  );
+
+  const monthlyLabels = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  const monthlyRevenue = monthlyLabels.map((month, index) =>
+    completedOrders
+      .filter(order => {
+        const date = new Date(order.date + "T00:00:00");
+        return date.getFullYear() === 2026 && date.getMonth() === index;
+      })
+      .reduce((sum, order) => sum + Number(order.total), 0)
+  );
+
+  const dark = document.body.classList.contains("dark-mode");
+  const fontColor = dark ? "#f3edf4" : "#665b65";
+
+  Object.values(charts).forEach(chart => chart.destroy());
+  charts = {};
+
+  const salesCanvas = document.getElementById("salesChart");
+  const categoryCanvas = document.getElementById("categoryChart");
+  const analyticsSales = document.getElementById("analyticsSalesChart");
+  const analyticsCategory = document.getElementById("analyticsCategoryChart");
+
+  const salesData = {
+    labels: monthlyLabels,
+    datasets: [{
+      label: "Revenue (RM)",
+      data: monthlyRevenue,
+      backgroundColor: "#a77b9a",
+      borderColor: "#80516f",
+      borderWidth: 2,
+      borderRadius: 6
+    }]
+  };
+
+  const categoryData = {
+    labels: categoryNames,
+    datasets: [{
+      data: categoryCounts,
+      backgroundColor: [
+        "#80516f",
+        "#b58eaa",
+        "#d4b9ce",
+        "#ead8e5"
+      ]
+    }]
+  };
+
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: fontColor }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: fontColor },
+        grid: { color: dark ? "#473c49" : "#eee5ed" }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: fontColor },
+        grid: { color: dark ? "#473c49" : "#eee5ed" }
+      }
+    }
+  };
+
+  if (salesCanvas && !salesCanvas.closest(".d-none")) {
+    charts.sales = new Chart(salesCanvas, {
+      type: "bar",
+      data: salesData,
+      options: commonOptions
+    });
+  }
+
+  if (categoryCanvas && !categoryCanvas.closest(".d-none")) {
+    charts.category = new Chart(categoryCanvas, {
+      type: "doughnut",
+      data: categoryData,
+      options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-            legend: {
-                labels: {
-                    usePointStyle: true
-                }
-            }
+          legend: {
+            position: "bottom",
+            labels: { color: fontColor }
+          }
         }
-    };
+      }
+    });
+  }
 
-    // Revenue bar chart
-    charts.revenue = new Chart(get("revenueChart"), {
-        type: "bar",
-        data: {
-            labels: months,
-            datasets: [{
-                label: "Revenue (RM)",
-                data: revenueData,
-                backgroundColor: "#B77F91",
-                borderRadius: 7
-            }]
-        },
-        options: {
-            ...commonOptions,
-            plugins: {legend: {display: false}},
-            scales: {
-                y: {beginAtZero: true}
-            }
+  if (analyticsSales && !analyticsSales.closest(".d-none")) {
+    charts.analyticsSales = new Chart(analyticsSales, {
+      type: "line",
+      data: {
+        labels: monthlyLabels,
+        datasets: [{
+          label: "Revenue (RM)",
+          data: monthlyRevenue,
+          borderColor: "#a77b9a",
+          backgroundColor: "rgba(167,123,154,.15)",
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  if (analyticsCategory && !analyticsCategory.closest(".d-none")) {
+    charts.analyticsCategory = new Chart(analyticsCategory, {
+      type: "pie",
+      data: categoryData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { color: fontColor }
+          }
         }
+      }
     });
-
-    // Order status doughnut chart
-    charts.status = new Chart(get("statusChart"), {
-        type: "doughnut",
-        data: {
-            labels: ["Completed", "Processing", "Pending"],
-            datasets: [{
-                data: [
-                    orders.filter(o => o.status === "Completed").length,
-                    orders.filter(o => o.status === "Processing").length,
-                    orders.filter(o => o.status === "Pending").length
-                ],
-                backgroundColor: ["#8FB9A1", "#A895BD", "#E6BD83"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...commonOptions,
-            cutout: "65%"
-        }
-    });
-
-    // Sales analytics line chart
-    charts.sales = new Chart(get("salesChart"), {
-        type: "line",
-        data: {
-            labels: months,
-            datasets: [{
-                label: "Monthly Revenue",
-                data: revenueData,
-                borderColor: "#9C6E83",
-                backgroundColor: "#F2E2E8",
-                fill: true,
-                tension: 0.35
-            }]
-        },
-        options: commonOptions
-    });
-
-    // Product category doughnut chart
-    const categories = ["Skincare", "Makeup", "Body Care", "Hair Care"];
-
-    charts.category = new Chart(get("categoryChart"), {
-        type: "doughnut",
-        data: {
-            labels: categories,
-            datasets: [{
-                data: categories.map(category =>
-                    products.filter(p => p.category === category).length
-                ),
-                backgroundColor: [
-                    "#B77F91",
-                    "#A895BD",
-                    "#E6BD83",
-                    "#8FB9A1"
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...commonOptions,
-            cutout: "65%"
-        }
-    });
+  }
 }
 
-// ==========================================
-// RENDER ALL DATA
-// ==========================================
+/* Prevent HTML injection */
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+/* Refresh all application data */
 
 function renderAll() {
-    updateDashboard();
-    renderProducts();
-    renderOrders();
-    renderCustomers();
-    renderRecentOrders();
-    renderCharts();
-}
+  products = getData(PRODUCTS_KEY);
+  orders = getData(ORDERS_KEY);
+  customers = getData(CUSTOMERS_KEY);
 
-// Save initial sample data
-saveData();
-
-// Restore session if administrator is already logged in
-if (sessionStorage.getItem("currentAdmin")) {
-    enterDashboard();
-} else {
-    showPage("loginPage");
+  renderDashboard();
+  renderProducts();
+  renderOrders();
+  renderCustomers();
+  renderCharts();
 }
