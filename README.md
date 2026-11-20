@@ -14,7 +14,7 @@ ShopEase is a web-based beauty e-commerce management system designed to help adm
 7. Responsive navigation and layout.
 
 ## Demo Login
-- Email: admin
+- Username: admin
 - Password: ShopEase123!
 
 ## Technologies Used
@@ -28,7 +28,7 @@ ShopEase is a web-based beauty e-commerce management system designed to help adm
 
 ## Instructions for Testing
 1. Open the website using Google Chrome.
-2. Enter the demo administrator email and password.
+2. Enter the demo administrator username and password.
 3. Click Login.
 4. Navigate through the dashboard sections.
 5. Test adding, editing and deleting products.
